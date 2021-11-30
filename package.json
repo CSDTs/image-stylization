@@ -12,7 +12,8 @@
     "prep": "yarn && mkdirp dist",
     "build": "browserify main.js -o dist/bundle.js",
     "lint": "eslint main.js --fix",
-    "deploy": "yarn build && uglifyjs dist/bundle.js -c -m -o dist/bundle.min.js"
+    "deploy": "yarn build && uglifyjs dist/bundle.js -c -m -o dist/bundle.min.js",
+    "serve": "node server.js"
   },
   "browserify": {
     "transform": [
