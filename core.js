@@ -34,6 +34,11 @@ class Core {
       this.transformNet = transformNet;
       // this.enableStylizeButtons();
     });
+
+    this.ide = null;
+    if (typeof world !== "undefined") {
+      this.ide = world.children[0];
+    }
   }
 
   generateStylizedImage(options) {
@@ -43,6 +48,8 @@ class Core {
       styleModel: "mobilenet",
       transformModel: "separable",
       styleRatio: 0.5,
+      contentSize: "400px",
+      sourceSize: "400px",
     };
 
     if (options) {
@@ -50,18 +57,22 @@ class Core {
     }
 
     this.contentImg = document.createElement("IMG");
-    this.contentImg.style.height = "400px";
+    this.contentImg.style.height = generic.contentSize;
     this.contentImg.style.width = "100%";
-    this.contentImg.src = "src/middleware/visualizer/" + generic.contentImage;
+    this.contentImg.src = generic.contentImage;
 
     this.styleImg = document.createElement("IMG");
-    this.styleImg.style.height = "400px";
+    this.styleImg.style.height = generic.sourceSize;
     this.styleImg.style.width = "100%";
     this.styleImg.src = generic.sourceImage;
 
     this.styleRatio = generic.styleRatio;
     this.stylized = document.createElement("CANVAS");
 
+    if (typeof world !== "undefined") {
+      let ide = world.children[0];
+      ide.broadcast("startProgress");
+    }
     Promise.all([this.loadStyleModel(), this.loadTransformModel()]).then(
       ([styleNet, transformNet]) => {
         console.log("Loaded styleNet");
@@ -83,6 +94,11 @@ class Core {
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+
+          if (typeof world !== "undefined") {
+            let ide = world.children[0];
+            ide.broadcast("endProgress");
+          }
         });
       }
     );
@@ -103,8 +119,11 @@ class Core {
   async loadMobileNetStyleModel() {
     if (!this.mobileStyleNet) {
       this.mobileStyleNet = await tf.loadGraphModel(
-        "src/middleware/visualizer/saved_model_style_js/model.json"
+        "/static/csnap_pro/src/middleware/visualizer/saved_model_style_js/model.json"
       );
+      if (this.ide) {
+        this.ide.broadcast("fastModelLoad");
+      }
     }
 
     return this.mobileStyleNet;
@@ -113,8 +132,11 @@ class Core {
   async loadInceptionStyleModel() {
     if (!this.inceptionStyleNet) {
       this.inceptionStyleNet = await tf.loadGraphModel(
-        "src/middleware/visualizer/saved_model_style_inception_js/model.json"
+        "/static/csnap_pro/src/middleware/visualizer/saved_model_style_inception_js/model.json"
       );
+      if (this.ide) {
+        this.ide.broadcast("highModelLoad");
+      }
     }
 
     return this.inceptionStyleNet;
@@ -123,8 +145,11 @@ class Core {
   async loadOriginalTransformerModel() {
     if (!this.originalTransformNet) {
       this.originalTransformNet = await tf.loadGraphModel(
-        "src/middleware/visualizer/saved_model_transformer_js/model.json"
+        "/static/csnap_pro/src/middleware/visualizer/saved_model_transformer_js/model.json"
       );
+      if (this.ide) {
+        this.ide.broadcast("highTransformLoad");
+      }
     }
 
     return this.originalTransformNet;
@@ -133,8 +158,11 @@ class Core {
   async loadSeparableTransformerModel() {
     if (!this.separableTransformNet) {
       this.separableTransformNet = await tf.loadGraphModel(
-        "src/middleware/visualizer/saved_model_transformer_separable_js/model.json"
+        "/static/csnap_pro/src/middleware/visualizer/saved_model_transformer_separable_js/model.json"
       );
+      if (this.ide) {
+        this.ide.broadcast("fastTransformLoad");
+      }
     }
 
     return this.separableTransformNet;
@@ -317,6 +345,28 @@ class Core {
     console.log(time);
   }
 }
+
+// function validateTextureSize(width, height) {
+//   var maxTextureSize = environment_1.ENV.get('WEBGL_MAX_TEXTURE_SIZE');
+//   if ((width <= 0) || (height <= 0)) {
+//       var requested = "[" + width + "x" + height + "]";
+//       if(typeof world !== 'undefined'){
+//           let ide = world.children[0]
+//           ide.broadcast('sizeError')
+//       }
+//       throw new Error('Requested texture size ' + requested + ' is invalid.');
+//   }
+//   if ((width > maxTextureSize) || (height > maxTextureSize)) {
+//       var requested = "[" + width + "x" + height + "]";
+//       var max = "[" + maxTextureSize + "x" + maxTextureSize + "]";
+//       if(typeof world !== 'undefined'){
+//           let ide = world.children[0]
+//           ide.broadcast('sizeError')
+//       }
+//       throw new Error('Requested texture size ' + requested +
+//           ' greater than WebGL maximum on this browser / GPU ' + max + '.');
+//   }
+// }
 
 window.application = new Core();
 console.log(window.application);
