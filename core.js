@@ -73,7 +73,7 @@ class Core {
       let ide = world.children[0];
       ide.broadcast("startProgress");
     }
-    Promise.all([this.loadStyleModel(), this.loadTransformModel()]).then(
+    Promise.all([this.loadStyleModel(generic.styleModel), this.loadTransformModel(generic.transformModel)]).then(
       ([styleNet, transformNet]) => {
         console.log("Loaded styleNet");
         this.styleNet = styleNet;
@@ -119,7 +119,7 @@ class Core {
   async loadMobileNetStyleModel() {
     if (!this.mobileStyleNet) {
       this.mobileStyleNet = await tf.loadGraphModel(
-        "/static/csnap_pro/src/middleware/visualizer/saved_model_style_js/model.json"
+        "/static/csnap_pro/csdt/ast/saved_model_style_js/model.json"
       );
       if (this.ide) {
         this.ide.broadcast("fastModelLoad");
@@ -132,7 +132,7 @@ class Core {
   async loadInceptionStyleModel() {
     if (!this.inceptionStyleNet) {
       this.inceptionStyleNet = await tf.loadGraphModel(
-        "/static/csnap_pro/src/middleware/visualizer/saved_model_style_inception_js/model.json"
+        "/static/csnap_pro/csdt/ast/saved_model_style_inception_js/model.json"
       );
       if (this.ide) {
         this.ide.broadcast("highModelLoad");
@@ -145,7 +145,7 @@ class Core {
   async loadOriginalTransformerModel() {
     if (!this.originalTransformNet) {
       this.originalTransformNet = await tf.loadGraphModel(
-        "/static/csnap_pro/src/middleware/visualizer/saved_model_transformer_js/model.json"
+        "/static/csnap_pro/csdt/ast/saved_model_transformer_js/model.json"
       );
       if (this.ide) {
         this.ide.broadcast("highTransformLoad");
@@ -158,7 +158,7 @@ class Core {
   async loadSeparableTransformerModel() {
     if (!this.separableTransformNet) {
       this.separableTransformNet = await tf.loadGraphModel(
-        "/static/csnap_pro/src/middleware/visualizer/saved_model_transformer_separable_js/model.json"
+        "/static/csnap_pro/csdt/ast/saved_model_transformer_separable_js/model.json"
       );
       if (this.ide) {
         this.ide.broadcast("fastTransformLoad");
