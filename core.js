@@ -4,25 +4,6 @@ import * as tf from "@tensorflow/tfjs";
 tf.ENV.set("WEBGL_PACK", false); // This needs to be done otherwise things run very slow v1.0.4
 import links from "./links";
 
-let styleOptions = ["mobilenet", "inception"];
-let transformerOptions = ["separable", "original"];
-
-window.testA = {
-  contentImage: "images/chicago.jpg",
-  sourceImage: "images/statue_of_liberty.jpg",
-  styleModel: "inception",
-  transformModel: "original",
-  styleRatio: 1,
-};
-
-window.testB = {
-  contentImage: "images/towers.jpg",
-  sourceImage: "images/red_circles.jpg",
-  styleModel: "inception",
-  transformModel: "original",
-  styleRatio: 0.23,
-};
-
 class Core {
   constructor() {
     Promise.all([
@@ -32,9 +13,9 @@ class Core {
       console.log("Loaded styleNet");
       this.styleNet = styleNet;
       this.transformNet = transformNet;
-      // this.enableStylizeButtons();
     });
 
+    //Checks if bundle is part of CSnap
     this.ide = null;
     if (typeof world !== "undefined") {
       this.ide = world.children[0];
@@ -48,53 +29,61 @@ class Core {
       styleModel: "mobilenet",
       transformModel: "separable",
       styleRatio: 0.5,
-      contentSize: "400px",
-      sourceSize: "400px",
+      contentSize: 100,
+      sourceSize: 100,
     };
 
     if (options) {
       Object.assign(generic, options);
     }
 
-    this.contentImg = document.createElement("IMG");
-    this.contentImg.style.height = generic.contentSize;
-    this.contentImg.style.width = "100%";
-    this.contentImg.src = generic.contentImage;
+    //TODO Convert to dynamic (width sizing issues prevented this from being done earlier)
+    this.contentImg = document.getElementById('base-image')
+    this.contentImg.removeAttribute('height');
+    this.contentImg.removeAttribute('width');
 
-    this.styleImg = document.createElement("IMG");
-    this.styleImg.style.height = generic.sourceSize;
-    this.styleImg.style.width = "100%";
+    this.contentImg.src = generic.contentImage;
+    this.contentImg.height = this.contentImg.height * generic.contentSize;
+    this.contentImg.width = this.contentImg.width * generic.contentSize;
+  
+    this.styleImg = document.getElementById('style-image')
+    this.styleImg.removeAttribute('height');
+    this.styleImg.removeAttribute('width');
     this.styleImg.src = generic.sourceImage;
+    this.styleImg.height = this.styleImg.height * generic.sourceSize;
+    this.styleImg.width = this.styleImg.width * generic.sourceSize;
 
     this.styleRatio = generic.styleRatio;
-    this.stylized = document.createElement("CANVAS");
+    this.stylized = document.getElementById("style-canvas");
 
+
+    // Calls the block that loads the progress bar to user
     if (typeof world !== "undefined") {
       let ide = world.children[0];
       ide.broadcast("startProgress");
     }
+
     Promise.all([this.loadStyleModel(generic.styleModel), this.loadTransformModel(generic.transformModel)]).then(
       ([styleNet, transformNet]) => {
         console.log("Loaded styleNet");
         this.styleNet = styleNet;
         this.transformNet = transformNet;
 
-        console.log(styleNet, transformNet);
         this.startStyling().finally(() => {
-          var a = document.createElement("a");
-          a.setAttribute("download", "output.jpeg");
+          let a = document.createElement("a");
+
+          this.fixStylizedImage();
+          a.setAttribute("download", "output.png");
           a.setAttribute(
             "href",
             this.stylized
-              .toDataURL("image/jpeg", 1.0)
-              .replace("image/jpeg", "image/octet-stream")
+              .toDataURL("image/png", 1.0)
           );
-
-          // a.download = "output.png";
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
 
+          // Calls the block that hides the progress bar to user
           if (typeof world !== "undefined") {
             let ide = world.children[0];
             ide.broadcast("endProgress");
@@ -102,6 +91,19 @@ class Core {
         });
       }
     );
+  }
+
+  // ? Where does tensorflow call to duplicate the canvas by 2?
+  // This fixes the doubling with the canvas, producing a proper image
+  fixStylizedImage(){
+    let canvas = document.getElementById('style-canvas');
+    let ctx = canvas.getContext('2d');
+    let width = canvas.width/2
+    let height = canvas.height/2
+    let imageData = ctx.getImageData(0,0, width, height);
+    canvas.width = width;
+    canvas.height = height;
+    ctx.putImageData(imageData, 0, 0);
   }
 
   async loadStyleModel(style) {
@@ -170,7 +172,7 @@ class Core {
 
   async startStyling() {
     await tf.nextFrame();
-    // this.styleButton.textContent = "Generating 100D style representation";
+    console.log("Generating 100D style representation");
     await tf.nextFrame();
     let bottleneck = await tf.tidy(() => {
       return this.styleNet.predict(
@@ -182,8 +184,7 @@ class Core {
       );
     });
     if (this.styleRatio !== 1.0) {
-      // this.styleButton.textContent =
-      //   "Generating 100D identity style representation";
+      console.log("Generating 100D identity style representation")
       await tf.nextFrame();
       const identityBottleneck = await tf.tidy(() => {
         return this.styleNet.predict(
@@ -207,7 +208,7 @@ class Core {
       styleBottleneck.dispose();
       identityBottleneck.dispose();
     }
-    // this.styleButton.textContent = "Stylizing image...";
+    console.log("Stylizing image...");
     await tf.nextFrame();
     const stylized = await tf.tidy(() => {
       return this.transformNet
@@ -369,4 +370,3 @@ class Core {
 // }
 
 window.application = new Core();
-console.log(window.application);
