@@ -31,6 +31,7 @@ class Core {
       styleRatio: 0.5,
       contentSize: 100,
       sourceSize: 100,
+      download:true,
     };
 
     if (options) {
@@ -73,15 +74,19 @@ class Core {
           let a = document.createElement("a");
 
           this.fixStylizedImage();
-          a.setAttribute("download", "output.png");
-          a.setAttribute(
-            "href",
-            this.stylized
-              .toDataURL("image/png", 1.0)
-          );
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          document.querySelector('#converted-image').src = this.stylized.toDataURL("image/png", 1.0);
+          if(generic.download){
+            a.setAttribute("download", "output.png");
+            a.setAttribute(
+              "href",
+              this.stylized
+                .toDataURL("image/png", 1.0)
+            );
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
+
 
           // Calls the block that hides the progress bar to user
           if (typeof world !== "undefined") {
