@@ -39,18 +39,18 @@ class Core {
     }
 
     //TODO Convert to dynamic (width sizing issues prevented this from being done earlier)
-    this.contentImg = document.getElementById('base-image')
-    this.contentImg.removeAttribute('height');
-    this.contentImg.removeAttribute('width');
+    this.contentImg = document.getElementById('base-img')
+    // this.contentImg.removeAttribute('height');
+    // this.contentImg.removeAttribute('width');
 
-    this.contentImg.src = generic.contentImage;
+    // this.contentImg.src = generic.contentImage;
     this.contentImg.height = this.contentImg.height * generic.contentSize;
     this.contentImg.width = this.contentImg.width * generic.contentSize;
   
-    this.styleImg = document.getElementById('style-image')
-    this.styleImg.removeAttribute('height');
-    this.styleImg.removeAttribute('width');
-    this.styleImg.src = generic.sourceImage;
+    this.styleImg = document.getElementById('style-img')
+    // this.styleImg.removeAttribute('height');
+    // this.styleImg.removeAttribute('width');
+    // this.styleImg.src = generic.sourceImage;
     this.styleImg.height = this.styleImg.height * generic.sourceSize;
     this.styleImg.width = this.styleImg.width * generic.sourceSize;
 
