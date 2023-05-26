@@ -1,8 +1,8 @@
 /* eslint-disable */
-import "babel-polyfill";
 import * as tf from "@tensorflow/tfjs";
-tf.ENV.set("WEBGL_PACK", false); // This needs to be done otherwise things run very slow v1.0.4
+import "babel-polyfill";
 import links from "./links";
+tf.ENV.set("WEBGL_PACK", false); // This needs to be done otherwise things run very slow v1.0.4
 
 class Core {
 	constructor() {
@@ -100,7 +100,9 @@ class Core {
 
 	async loadMobileNetStyleModel() {
 		if (!this.mobileStyleNet) {
-			this.mobileStyleNet = await tf.loadGraphModel("/static/csnap_pro/csdt/ast/saved_model_style_js/model.json");
+			this.mobileStyleNet = await tf.loadGraphModel(
+				"/static/csnap_pro/csdt/features/nst/lib/saved_model_style_js/model.json"
+			);
 			if (this.ide) {
 				this.ide.broadcast("fastModelLoad");
 			}
@@ -112,7 +114,7 @@ class Core {
 	async loadInceptionStyleModel() {
 		if (!this.inceptionStyleNet) {
 			this.inceptionStyleNet = await tf.loadGraphModel(
-				"/static/csnap_pro/csdt/ast/saved_model_style_inception_js/model.json"
+				"/static/csnap_pro/csdt/features/nst/lib/saved_model_style_inception_js/model.json"
 			);
 			if (this.ide) {
 				this.ide.broadcast("highModelLoad");
@@ -125,7 +127,7 @@ class Core {
 	async loadOriginalTransformerModel() {
 		if (!this.originalTransformNet) {
 			this.originalTransformNet = await tf.loadGraphModel(
-				"/static/csnap_pro/csdt/ast/saved_model_transformer_js/model.json"
+				"/static/csnap_pro/csdt/features/nst/lib/saved_model_transformer_js/model.json"
 			);
 			if (this.ide) {
 				this.ide.broadcast("highTransformLoad");
@@ -138,7 +140,7 @@ class Core {
 	async loadSeparableTransformerModel() {
 		if (!this.separableTransformNet) {
 			this.separableTransformNet = await tf.loadGraphModel(
-				"/static/csnap_pro/csdt/ast/saved_model_transformer_separable_js/model.json"
+				"/static/csnap_pro/csdt/features/nst/lib/saved_model_transformer_separable_js/model.json"
 			);
 			if (this.ide) {
 				this.ide.broadcast("fastTransformLoad");
